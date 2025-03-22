@@ -2,6 +2,7 @@ package password
 
 import (
 	"github.com/Glaucus/Bracelet/users"
+	"time"
 
 	"github.com/brianvoe/sjwt"
 
@@ -34,6 +35,7 @@ func Controller(w http.ResponseWriter, r *http.Request) {
 	claims := sjwt.New()
 	claims.Set("username", user.Username)
 	claims.Set("user_id", user.Id)
+	claims.Set("iat", time.Now().Unix())
 
 	// Generate jwt
 	secretKey := []byte(os.Getenv("JWT_SIGNING_KEY"))
