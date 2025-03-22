@@ -1,0 +1,39 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Kubernetes CLI
+        uses: azure/setup-kubectl@v4
+
+      - name: Authenticate with Kubernetes
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > kubeconfig.yaml
+          export KUBECONFIG=kubeconfig.yaml
+
+      - name: Build and Push Docker Image
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_TAG }}:${{ github.sha }} .
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_TAG }}:${{ github.sha }}
+
+      - name: Replace GITHUB_SECRET_ variables with actual GitHub Secrets
+        run: |
+          sed -i -E 's/GITHUB_SECRET_FANCY_SECRET/${{ secrets.FANCY_SECRET }}/g' .k3s/*.yaml
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f .k3s/ --kubeconfig=kubeconfig.yaml
+          kubectl set image deployment/${{ secrets.K3S_DEPLOYMENT }} -n ${{ secrets.K3S_NAMESPACE }} ${{ secrets.K3S_DEPLOYMENT }}=${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE_TAG }}:${{ github.sha }} --kubeconfig=kubeconfig.yaml
+          kubectl rollout status deployment/${{ secrets.K3S_DEPLOYMENT }} -n ${{ secrets.K3S_NAMESPACE }} --kubeconfig=kubeconfig.yaml
