@@ -2,6 +2,7 @@ package httpServer
 
 import (
 	loginPassword "github.com/Glaucus/Bracelet/httpServer/controllers/login/password"
+	accountModify "github.com/Glaucus/Bracelet/httpServer/controllers/modify"
 	registerPassword "github.com/Glaucus/Bracelet/httpServer/controllers/register/password"
 
 	"github.com/gorilla/mux"
@@ -15,6 +16,7 @@ func Start() {
 	apiRouter.Use(contentTypeApplicationJsonMiddleware)
 	apiRouter.HandleFunc("/login/password", loginPassword.Controller)
 	apiRouter.HandleFunc("/register/password", registerPassword.Controller)
+	apiRouter.HandleFunc("/modify", accountModify.Controller)
 	log.Fatal(http.ListenAndServe(":80", apiRouter))
 }
 

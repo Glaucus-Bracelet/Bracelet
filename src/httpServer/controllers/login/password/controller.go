@@ -28,7 +28,7 @@ func Controller(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate a JWT!
-	jwt := token.GenerateJWT(*user)
+	jwt := token.GenerateJWT(user)
 	json.NewEncoder(w).Encode(Response{Token: jwt})
 }
 
