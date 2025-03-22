@@ -1,15 +1,11 @@
 package password
 
 import (
-	"github.com/Glaucus/Bracelet/users"
-	"time"
-
-	"github.com/brianvoe/sjwt"
-
 	"encoding/json"
+	"github.com/Glaucus/Bracelet/token"
+	"github.com/Glaucus/Bracelet/users"
 	"io/ioutil"
 	"net/http"
-	"os"
 )
 
 func Controller(w http.ResponseWriter, r *http.Request) {
@@ -31,16 +27,8 @@ func Controller(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set Claims
-	claims := sjwt.New()
-	claims.Set("username", user.Username)
-	claims.Set("user_id", user.Id)
-	claims.Set("iat", time.Now().Unix())
-
-	// Generate jwt
-	secretKey := []byte(os.Getenv("JWT_SIGNING_KEY"))
-	jwt := claims.Generate(secretKey)
-
+	// Generate a JWT!
+	jwt := token.GenerateJWT(*user)
 	json.NewEncoder(w).Encode(Response{Token: jwt})
 }
 
