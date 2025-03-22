@@ -15,8 +15,6 @@ spec:
       labels:
         app: bracelet
     spec:
-      imagePullSecrets:
-        - name: regcred
       containers:
         - name: bracelet
           image: nuriofernandez/bracelet:latest
